@@ -44,16 +44,22 @@ size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
 }
 
 /**
- * @brief This function finds result of XOR operation between two arrays
+ * @brief This function finds result of XOR operation between array and key
  * 
  * @param src1 first operand
- * @param src2 second operand
+ * @param key key for XOR operation
  * @param dst array, where result will be written
  * @param len how many bytes will be XOR'ed
+ * @param keylen length of key
  */
-void xor2arrays(const uint8_t *src1, const uint8_t *src2, uint8_t *dst, const size_t len) {
-    for (size_t i = 0; i < len; i++) {
-        *dst++ = *src1++ ^ *src2++;
+void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len, const size_t keylen) {
+    for (size_t i = 0; i < len; i += keylen) {
+
+        int remainder = (len - i > keylen) ? keylen : len-i;
+
+        for (size_t j = 0; j < remainder; j++) {
+            *dst++ = *src++ ^ key[j];
+        }
     }
 }
 
@@ -83,4 +89,35 @@ ssize_t read_stdin(char **buffer) {
     }
 
     return len;
+}
+
+float english_text_oracle(uint8_t *src, size_t len) {
+
+    if (len < 2) return -999999.0f;
+
+    float score = 0;
+
+    int first_bigram_letter = ascii2alpha(src[0]);
+
+    if (first_bigram_letter == -1) return -999999.0f;
+
+    size_t i;
+    for (i = 1; i < len; i++) {
+
+        int second_bigram_letter = ascii2alpha(src[i]);
+
+        if (second_bigram_letter == -1) return -999999.0f;
+
+        if (first_bigram_letter == 27 || second_bigram_letter == 27) {
+            score += -15.0f;
+        } else {
+            score += bigram_log_probs[first_bigram_letter][second_bigram_letter];
+        }
+
+        first_bigram_letter = second_bigram_letter;
+
+    }
+
+    return score / (len - 1);
+
 }
