@@ -42,3 +42,45 @@ size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
     return base64_index;
 
 }
+
+/**
+ * @brief This function finds result of XOR operation between two arrays
+ * 
+ * @param src1 first operand
+ * @param src2 second operand
+ * @param dst array, where result will be written
+ * @param len how many bytes will be XOR'ed
+ */
+void xor2arrays(const uint8_t *src1, const uint8_t *src2, uint8_t *dst, const size_t len) {
+    for (size_t i = 0; i < len; i++) {
+        *dst++ = *src1++ ^ *src2++;
+    }
+}
+
+
+/**
+ * @brief This function reads input from stdin and returns length of this input.
+ * Memory used by this function must be freed after use
+ * 
+ * @param buffer pointer to pointer of string array
+ * @return length of input string
+ */
+ssize_t read_stdin(char **buffer) {
+
+    size_t size = 0;
+    ssize_t len;
+
+    len = getline(buffer, &size, stdin);
+
+    if (len != -1) {
+        if ((*buffer)[len - 1] == '\n') {
+            (*buffer)[len - 1] = '\0';
+            len -= 1;
+        }
+    } else {
+        free(*buffer);
+        return -1;
+    }
+
+    return len;
+}

@@ -1,21 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "crypto_utils.h"
 
 int main() {
 
-    char *buffer = NULL;
-    size_t size = 0;
     ssize_t len;
+    char *buffer = NULL;
 
-    len = getline(&buffer, &size, stdin);
-
-    if (len != -1) {
-        if (buffer[len - 1] == '\n') {
-            buffer[len - 1] = '\0';
-            len -= 1;
-        }
-    } else {
+    if ((len = read_stdin(&buffer)) == -1) {
         return 1;
     }
 
@@ -24,10 +14,8 @@ int main() {
 
     char *base64_buffer = (char *)malloc(base64_len);
     char *hex_buffer = (char *)calloc(hex_len, 1);
-    
-    for (size_t i = 0; i < len; i += 2) {
-        hex_buffer[i >> 1] = ascii2byte(*(uint16_t *)(buffer+i));
-    }
+
+    ascii_array_2_byte((uint16_t *)buffer, hex_buffer, hex_len);
 
     hex2base64(hex_buffer, base64_buffer, hex_len);
 

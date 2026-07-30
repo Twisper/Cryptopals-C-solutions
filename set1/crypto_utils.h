@@ -1,6 +1,8 @@
 #ifndef CRYPTO_UTILS_H
 #define CRYPTO_UTILS_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -8,7 +10,9 @@
 static const char ascii_lut[] = "0123456789ABCDEF";
 static const char base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+ssize_t read_stdin(char **buffer);
 size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len);
+void xor2arrays(const uint8_t *src1, const uint8_t *src2, uint8_t *dst, const size_t len);
 
 /*
     There is one simple trick for fast convertation without using if/else or giant lookup tables
@@ -22,7 +26,21 @@ static inline char ascii2byte(uint16_t ascii_byte) {
 }
 
 static inline uint16_t byte2ascii(char byte) {
-    return ((ascii_lut[byte >> 4]) << 8) | (ascii_lut[byte & 0xF]);
+    return ((ascii_lut[byte & 0xF]) << 8) | (ascii_lut[byte >> 4]);
+}
+
+//len is length of hex array
+static inline void ascii_array_2_byte(uint16_t *src, uint8_t *dst, size_t len) {
+    for (size_t i = 0; i < len; i++) {
+        *dst++ = ascii2byte(*src++);
+    }
+}
+
+//len is length of hex array
+static inline void byte_array_2_ascii(uint8_t *src, uint16_t *dst, size_t len) {
+    for (size_t i = 0; i < len; i++) {
+        *dst++ = byte2ascii(*src++);
+    }
 }
 
 #endif
