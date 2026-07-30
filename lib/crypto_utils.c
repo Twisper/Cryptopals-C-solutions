@@ -57,7 +57,7 @@ void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len,
 
         int remainder = (len - i > keylen) ? keylen : len-i;
 
-        for (size_t j = 0; j < remainder; j++) {
+        for (int j = 0; j < remainder; j++) {
             *dst++ = *src++ ^ key[j];
         }
     }
@@ -91,6 +91,14 @@ ssize_t read_stdin(char **buffer) {
     return len;
 }
 
+/**
+ * @brief This function counts logarithmic probability of given array, to be close to normal English text.
+ * This is nessesary to check decrypted string automatically in order to find answer (if it is known, that English text was encrypted)
+ * 
+ * @param src array of ascii symbols
+ * @param len length of array
+ * @return normalised logarithmic probability of given string of being English
+ */
 float english_text_oracle(uint8_t *src, size_t len) {
 
     if (len < 2) return -999999.0f;

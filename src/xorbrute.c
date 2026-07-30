@@ -9,7 +9,7 @@ int main() {
 
     size_t hex_len = len / 2 + (len & 1);
 
-    ascii_array_2_byte((uint16_t *)buffer, (uint8_t *)buffer, len);
+    ascii_array_2_byte((uint16_t *)buffer, (uint8_t *)buffer, hex_len);
 
     char *temp_array = (char *)malloc(hex_len+1);
     float curr_score;
@@ -21,10 +21,6 @@ int main() {
     for (uint8_t xor_byte = 1; xor_byte != 0; xor_byte++) {
 
         xor_array((const uint8_t *)buffer, &xor_byte, (uint8_t *)temp_array, hex_len, 1);
-
-        for (size_t i = 0; i < hex_len; i++) {
-            temp_array[i] = buffer[i] ^ (char)xor_byte;
-        }
 
         curr_score = english_text_oracle((uint8_t *)temp_array, hex_len);
 

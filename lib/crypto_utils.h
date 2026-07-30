@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <float.h>
 #include <string.h>
+#include <fcntl.h>
 
 static const char ascii_lut[] = "0123456789ABCDEF";
 static const char base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -55,7 +56,7 @@ float english_text_oracle(uint8_t *src, size_t len);
     or 'a'-'f' (0x61-0x66) 7th bit set to 1. This bit can be used to multiply it by 9 and add to lower 4th bits of character,
     which allows to convert byte to nibble using only maths without branching (This function converts two ASCII bytes into one using same method)
 */
-static inline char ascii2byte(uint16_t ascii_byte) {
+static inline uint8_t ascii2byte(uint16_t ascii_byte) {
     return ((ascii_byte & 0xF) + 9 * ((ascii_byte & 0x40) >> 6)) << 4 | 
                 (((ascii_byte >> 8) & 0xF) + 9 * (((ascii_byte >> 8) & 0x40) >> 6));
 }
