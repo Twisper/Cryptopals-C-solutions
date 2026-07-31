@@ -45,7 +45,8 @@ static const float bigram_log_probs[27][27] = {
     {  -3.89f,  -4.64f,  -5.00f,  -5.23f,  -5.65f,  -4.97f,  -5.80f,  -4.24f,  -4.08f,  -7.41f,  -6.91f,  -5.41f,  -4.20f,  -5.23f,  -4.53f,  -5.20f,  -8.26f,  -5.69f,  -4.33f,  -3.58f,  -5.88f,  -6.54f,  -4.36f,  -9.71f,  -5.04f, -11.88f, -13.96f },
 };
 
-ssize_t read_stdin(char **buffer);
+ssize_t read_line_stream(char **buffer, FILE *stream);
+size_t read_input_stream(char **buffer, FILE *stream);
 size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len);
 void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len, const size_t keylen);
 float english_text_oracle(uint8_t *src, size_t len);
@@ -79,6 +80,7 @@ static inline void byte_array_2_ascii(uint8_t *src, uint16_t *dst, size_t len) {
     }
 }
 
+//Converts ascii symbol to number of this symbol in alphabet
 static inline int ascii2alpha(char byte) {
 
     if ('A' <= byte && byte <= 'Z') return byte - 'A';

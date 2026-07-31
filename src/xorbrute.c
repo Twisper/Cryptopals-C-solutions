@@ -5,7 +5,7 @@ int main() {
     ssize_t len;
     char *buffer = NULL;
 
-    len = read_stdin(&buffer);
+    len = read_line_stream(&buffer, stdin);
 
     size_t hex_len = len / 2 + (len & 1);
 

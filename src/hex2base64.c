@@ -5,7 +5,7 @@ int main() {
     ssize_t len;
     char *buffer = NULL;
 
-    if ((len = read_stdin(&buffer)) == -1) {
+    if ((len = read_line_stream(&buffer, stdin)) == -1) {
         return 1;
     }
 

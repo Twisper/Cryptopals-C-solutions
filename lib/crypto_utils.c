@@ -65,18 +65,18 @@ void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len,
 
 
 /**
- * @brief This function reads input from stdin and returns length of this input.
+ * @brief This function reads one line from specific stream and returns length of this input.
  * Memory used by this function must be freed after use
  * 
  * @param buffer pointer to pointer of string array
- * @return length of input string
+ * @return length of input, -1 if error or -2 if EOF
  */
-ssize_t read_stdin(char **buffer) {
+ssize_t read_line_stream(char **buffer, FILE *stream) {
 
     size_t size = 0;
     ssize_t len;
 
-    len = getline(buffer, &size, stdin);
+    len = getline(buffer, &size, stream);
 
     if (len != -1) {
         if ((*buffer)[len - 1] == '\n') {
@@ -85,10 +85,44 @@ ssize_t read_stdin(char **buffer) {
         }
     } else {
         free(*buffer);
-        return -1;
+        if (!feof(stream)) 
+            return -1;
+        else
+            return -2;
     }
 
     return len;
+}
+
+/**
+ * @brief This function reads an entire input to EOF, allocating memory and returning pointer to it with length of input.
+ * Memory used by this function must be freed after use
+ * 
+ * @param buffer pointer to pointer of buffer
+ * @param stream from where input will be received
+ * @return total length of input
+ */
+size_t read_input_stream(char **buffer, FILE *stream) {
+    size_t curr_input_size;
+    size_t input_size = 0;
+
+    char *stdin_buf = (char *)malloc(1025);
+
+    while ((curr_input_size = fread(stdin_buf + (char)input_size, sizeof(char), 1024, stream)) > 0) {
+        if (curr_input_size == 1024) {
+            stdin_buf = (char *)realloc(stdin_buf, input_size + 1025);
+        }
+        input_size += curr_input_size;
+    }
+
+    *buffer = stdin_buf;
+    if (stdin_buf[input_size-1] == '\n') {
+        stdin_buf[input_size-1] = '\0';
+        input_size -= 1;
+    }
+    stdin_buf[input_size] = '\0';
+    return input_size;
+
 }
 
 /**

@@ -6,8 +6,8 @@ int main() {
     char *buffer_second = NULL;
     ssize_t len1, len2;
 
-    len1 = read_stdin(&buffer_first);
-    len2 = read_stdin(&buffer_second);
+    len1 = read_line_stream(&buffer_first, stdin);
+    len2 = read_line_stream(&buffer_second, stdin);
 
     ascii_array_2_byte((uint16_t *)buffer_first, (uint8_t *)buffer_first, len1 / 2 + (len1 & 1));
     ascii_array_2_byte((uint16_t *)buffer_second, (uint8_t *)buffer_second, len2 / 2 + (len2 & 1));
