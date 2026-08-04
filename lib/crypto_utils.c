@@ -5,12 +5,10 @@
  * @param src array of uint8_t (hex) elements 
  * @param dst array of ascii bytes
  * @param len length of encoded array
- * @return length of Base64 encoded array
  */
-size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
+void hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
 
     size_t i = 0;
-    size_t base64_index = 0;
     if (len >= 3) {
         for (i = 0; i < len; i += 3) {
             uint32_t iter_bytes = src[i] << 16 | src[i+1] << 8 | src[i+2];
@@ -18,7 +16,6 @@ size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
             *dst++ = base64[iter_bytes >> 12 & 0x3F];
             *dst++ = base64[iter_bytes >> 6 & 0x3F];
             *dst++ = base64[iter_bytes & 0x3F];
-            base64_index += 4;
         }
     }
 
@@ -28,18 +25,28 @@ size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
         *dst++ = base64[iter_bytes >> 12 & 0x3F];
         *dst++ = base64[iter_bytes >> 6 & 0x3F];
         *dst++ = '=';
-        base64_index += 4;
     } else if (len - i == 1) {
         uint32_t iter_bytes = src[i] << 16;
         *dst++ = base64[iter_bytes >> 18 & 0x3F];
         *dst++ = base64[iter_bytes >> 12 & 0x3F];
         *dst++ = '=';
         *dst++ = '=';
-        base64_index += 4;
     }
     *dst = '\0';
 
-    return base64_index;
+}
+
+//len is size of base64 buffer
+void base64_2hex(const uint8_t *src, uint8_t *dst, const size_t len) {
+
+    size_t i = 0;
+    while (len - i != 0) {
+        uint32_t three_bytes = base64_2_hex_lut[*src++] << 18 | (base64_2_hex_lut[*src++] << 12) | (base64_2_hex_lut[*src++] << 6) | (base64_2_hex_lut[*src++]);
+        *dst++ = (three_bytes >> 16) & 0xFF;
+        *dst++ = (three_bytes >> 8) & 0xFF;
+        *dst++ = (three_bytes) & 0xFF;
+        i += 4;
+    }
 
 }
 
@@ -104,36 +111,82 @@ ssize_t read_line_stream(char **buffer, FILE *stream) {
  */
 size_t read_input_stream(char **buffer, FILE *stream) {
     size_t curr_input_size;
+    size_t curr_buf_size = 1024;
     size_t input_size = 0;
 
-    char *stdin_buf = (char *)malloc(1025);
+    char *stdin_buf;
+    char *new_buf;
+    if ((stdin_buf = (char *)malloc(curr_buf_size + 1)) == NULL) {
+        return 0;
+    }
 
-    while ((curr_input_size = fread(stdin_buf + (char)input_size, sizeof(char), 1024, stream)) > 0) {
-        if (curr_input_size == 1024) {
-            stdin_buf = (char *)realloc(stdin_buf, input_size + 1025);
-        }
+    while ((curr_input_size = fread(stdin_buf + input_size, sizeof(char), 1024, stream)) > 0) {
         input_size += curr_input_size;
+        if (curr_buf_size - input_size < 1024) {
+            new_buf = (char *)realloc(stdin_buf, curr_buf_size + 1024 + 1);
+            if (new_buf == NULL) {
+                free(stdin_buf);
+                return 0;
+            }
+            curr_buf_size += 1024;
+            stdin_buf = new_buf;
+        }
     }
 
-    *buffer = stdin_buf;
-    if (stdin_buf[input_size-1] == '\n') {
-        stdin_buf[input_size-1] = '\0';
-        input_size -= 1;
+    if (input_size != 0) {
+        *buffer = stdin_buf;
+        if (stdin_buf[input_size-1] == '\n') {
+            stdin_buf[input_size-1] = '\0';
+            input_size -= 1;
+        }
+        stdin_buf[input_size] = '\0';
+    } else {
+        free(stdin_buf);
+        return 0;
     }
-    stdin_buf[input_size] = '\0';
+    
     return input_size;
-
 }
 
 /**
- * @brief This function counts logarithmic probability of given array, to be close to normal English text.
+ * @brief This function counts logarithmic probability of given array, to be close to normal English text, using unigrams method with Chi-Square test.
  * This is nessesary to check decrypted string automatically in order to find answer (if it is known, that English text was encrypted)
  * 
  * @param src array of ascii symbols
  * @param len length of array
  * @return normalised logarithmic probability of given string of being English
  */
-float english_text_oracle(uint8_t *src, size_t len) {
+float chi_square_oracle(uint8_t *src, size_t len) {
+
+    if (len == 0) return -999999.0f;
+
+    float score = 0;
+
+    for (size_t i = 0; i < len; i++) {
+
+        int curr_index = ascii2alpha(src[i]);
+
+        if (curr_index == -1) return -999999.0f;
+
+        if (curr_index == 27)
+            score += -5.0f;
+        else
+            score += unigram_log_probs[curr_index];
+
+    }
+
+    return score / len;
+}
+
+/**
+ * @brief This function counts logarithmic probability of given array, to be close to normal English text, using bigrams method.
+ * This is nessesary to check decrypted string automatically in order to find answer (if it is known, that English text was encrypted)
+ * 
+ * @param src array of ascii symbols
+ * @param len length of array
+ * @return normalised logarithmic probability of given string of being English
+ */
+float bigram_text_oracle(uint8_t *src, size_t len) {
 
     if (len < 2) return -999999.0f;
 
@@ -161,5 +214,39 @@ float english_text_oracle(uint8_t *src, size_t len) {
     }
 
     return score / (len - 1);
+
+}
+
+/**
+ * @brief this function calculates Hamming distance (how many bits differ) betweem two hex arrays using __builtin_popcount intrinsic
+ * 
+ * @param src1 first array-operand
+ * @param src2 second array-operand
+ * @param len1 amount of symbols from first operand
+ * @param len2 amount of symbols from second operand
+ * @return hamming distance between two hex arrays
+ */
+int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len1, const size_t len2) {
+
+    size_t distance = 0;
+
+    uint8_t *temp_array;
+
+    if ((temp_array = (uint8_t *)malloc(len1)) == NULL) return -1;
+
+    xor_array(src1, src2, temp_array, len1, len2);
+
+    for (size_t i = 0; i < len1; i++) {
+        distance += __builtin_popcount((uint32_t)temp_array[i]);
+        // uint8_t curr_byte = temp_array[i];
+        // for (size_t j = 0; j < 8; j++) {
+        //     distance += (curr_byte & 1);
+        //     curr_byte >>= 1;
+        // }
+    }
+
+    free(temp_array);
+
+    return distance;
 
 }

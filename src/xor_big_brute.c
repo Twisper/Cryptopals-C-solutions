@@ -35,7 +35,7 @@ int main() {
 
             xor_array((const uint8_t *)hex_buffer, &xor_byte, (uint8_t *)temp_array, hex_len, 1);
 
-            curr_score = english_text_oracle((uint8_t *)temp_array, hex_len);
+            curr_score = bigram_text_oracle((uint8_t *)temp_array, hex_len);
 
             if (curr_score > best_score) {
                 best_score = curr_score;

@@ -22,6 +22,7 @@ int main() {
     printf("Resulting Base64: %s\n", base64_buffer);
 
     free(buffer);
+    free(hex_buffer);
     free(base64_buffer);
 
     return 0;

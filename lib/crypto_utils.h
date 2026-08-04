@@ -10,7 +10,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-static const char ascii_lut[] = "0123456789ABCDEF";
+static const char ascii_lut[] = "0123456789abcdef";
 static const char base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // LUT for bigrams oracle function, based on Clarissa
@@ -45,11 +45,32 @@ static const float bigram_log_probs[27][27] = {
     {  -3.89f,  -4.64f,  -5.00f,  -5.23f,  -5.65f,  -4.97f,  -5.80f,  -4.24f,  -4.08f,  -7.41f,  -6.91f,  -5.41f,  -4.20f,  -5.23f,  -4.53f,  -5.20f,  -8.26f,  -5.69f,  -4.33f,  -3.58f,  -5.88f,  -6.54f,  -4.36f,  -9.71f,  -5.04f, -11.88f, -13.96f },
 };
 
+static const float unigram_log_probs[27] = {
+    -2.9545f, -4.5010f, -4.1605f, -3.6479f, -2.4848f, -4.2064f, -4.5322f,
+    -3.1868f, -3.0330f, -7.1652f, -5.5956f, -3.5864f, -3.8196f, -3.1145f,
+    -2.8452f, -4.4314f, -7.5559f, -3.2133f, -3.1404f, -2.7702f, -3.7685f,
+    -4.7214f, -4.1584f, -6.8585f, -3.9305f, -8.3811f, -1.1617f,
+};
+
+static const char base64_2_hex_lut[256] = {
+    ['A'] = 0,  ['B'] = 1,  ['C'] = 2,  ['D'] = 3,  ['E'] = 4,  ['F'] = 5,  ['G'] = 6,  ['H'] = 7, 
+    ['I'] = 8,  ['J'] = 9,  ['K'] = 10, ['L'] = 11, ['M'] = 12, ['N'] = 13, ['O'] = 14, ['P'] = 15, 
+    ['Q'] = 16, ['R'] = 17, ['S'] = 18, ['T'] = 19, ['U'] = 20, ['V'] = 21, ['W'] = 22, ['X'] = 23,
+    ['Y'] = 24, ['Z'] = 25, ['a'] = 26, ['b'] = 27, ['c'] = 28, ['d'] = 29, ['e'] = 30, ['f'] = 31,
+    ['g'] = 32, ['h'] = 33, ['i'] = 34, ['j'] = 35, ['k'] = 36, ['l'] = 37, ['m'] = 38, ['n'] = 39,
+    ['o'] = 40, ['p'] = 41, ['q'] = 42, ['r'] = 43, ['s'] = 44, ['t'] = 45, ['u'] = 46, ['v'] = 47,
+    ['w'] = 48, ['x'] = 49, ['y'] = 50, ['z'] = 51, ['0'] = 52, ['1'] = 53, ['2'] = 54, ['3'] = 55,
+    ['4'] = 56, ['5'] = 57, ['6'] = 58, ['7'] = 59, ['8'] = 60, ['9'] = 61, ['+'] = 62, ['/'] = 63, ['='] = 0,
+};
+
 ssize_t read_line_stream(char **buffer, FILE *stream);
 size_t read_input_stream(char **buffer, FILE *stream);
-size_t hex2base64(const uint8_t *src, uint8_t *dst, const size_t len);
+int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len1, const size_t len2);
+void hex2base64(const uint8_t *src, uint8_t *dst, const size_t len);
+void base64_2hex(const uint8_t *src, uint8_t *dst, const size_t len);
 void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len, const size_t keylen);
-float english_text_oracle(uint8_t *src, size_t len);
+float bigram_text_oracle(uint8_t *src, size_t len);
+float chi_square_oracle(uint8_t *src, size_t len);
 
 /*
     There is one simple trick for fast convertation without using if/else or giant lookup tables
