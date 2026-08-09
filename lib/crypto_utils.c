@@ -40,7 +40,7 @@ void hex2base64(const uint8_t *src, uint8_t *dst, const size_t len) {
 void base64_2hex(const uint8_t *src, uint8_t *dst, const size_t len) {
 
     size_t i = 0;
-    while (len - i != 0) {
+    while (i < len) {
         uint32_t three_bytes = base64_2_hex_lut[*src++] << 18 | (base64_2_hex_lut[*src++] << 12) | (base64_2_hex_lut[*src++] << 6) | (base64_2_hex_lut[*src++]);
         *dst++ = (three_bytes >> 16) & 0xFF;
         *dst++ = (three_bytes >> 8) & 0xFF;
@@ -226,26 +226,18 @@ float bigram_text_oracle(uint8_t *src, size_t len) {
  * @param len2 amount of symbols from second operand
  * @return hamming distance between two hex arrays
  */
-int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len1, const size_t len2) {
+int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len) {
 
     size_t distance = 0;
 
-    uint8_t *temp_array;
-
-    if ((temp_array = (uint8_t *)malloc(len1)) == NULL) return -1;
-
-    xor_array(src1, src2, temp_array, len1, len2);
-
-    for (size_t i = 0; i < len1; i++) {
-        distance += __builtin_popcount((uint32_t)temp_array[i]);
+    for (size_t i = 0; i < len; i++) {
+        distance += __builtin_popcount((uint32_t)(src1[i] ^ src2[i]));
         // uint8_t curr_byte = temp_array[i];
         // for (size_t j = 0; j < 8; j++) {
         //     distance += (curr_byte & 1);
         //     curr_byte >>= 1;
         // }
     }
-
-    free(temp_array);
 
     return distance;
 

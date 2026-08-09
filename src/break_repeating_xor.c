@@ -36,7 +36,7 @@ int main() {
 
             for (size_t j = 0; j < curr_step && i + j <= hamming_border; j += keylen) {
 
-                curr_hamming_score += (float)hamming_distance(hex_buffer + i + j, hex_buffer + i + j + keylen, keylen, keylen) / keylen;
+                curr_hamming_score += (float)hamming_distance(hex_buffer + i + j, hex_buffer + i + j + keylen, keylen) / keylen;
                 pairs_count++;
 
             }

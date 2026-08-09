@@ -65,7 +65,7 @@ static const char base64_2_hex_lut[256] = {
 
 ssize_t read_line_stream(char **buffer, FILE *stream);
 size_t read_input_stream(char **buffer, FILE *stream);
-int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len1, const size_t len2);
+int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len);
 void hex2base64(const uint8_t *src, uint8_t *dst, const size_t len);
 void base64_2hex(const uint8_t *src, uint8_t *dst, const size_t len);
 void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len, const size_t keylen);

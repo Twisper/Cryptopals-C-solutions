@@ -13,4 +13,8 @@ clean:
 	$(CC) $< ./lib/crypto_utils.c -o ./build/$@.out $(CFLAGS)
 
 debug-%: ./src/%.c ./lib/crypto_utils.c
-	$(CC) ./src/$< -o ./build/debug-$@.out $(CFLAGS-DEBUG)
+	$(CC) $< -o ./build/debug-$@.out $(CFLAGS-DEBUG)
+
+aes-%: ./src/%.c ./lib/aes.c ./lib/crypto_utils.c
+	$(CC) $< ./lib/aes.c ./lib/crypto_utils.c -o ./build/$@.out $(CFLAGS)
+	
