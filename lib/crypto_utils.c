@@ -76,6 +76,7 @@ void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len,
  * Memory used by this function must be freed after use
  * 
  * @param buffer pointer to pointer of string array
+ * @param stream from where input will be received
  * @return length of input, -1 if error or -2 if EOF
  */
 ssize_t read_line_stream(char **buffer, FILE *stream) {
