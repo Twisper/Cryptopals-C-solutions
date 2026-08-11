@@ -243,3 +243,13 @@ int hamming_distance(const uint8_t *src1, const uint8_t *src2, const size_t len)
     return distance;
 
 }
+
+void pkcs7_padding(uint8_t *src, size_t len, size_t new_len) {
+
+    uint8_t padding_byte = new_len - len;
+
+    for (size_t i = len; i < new_len; i++) {
+        src[i] = padding_byte;
+    }
+
+}

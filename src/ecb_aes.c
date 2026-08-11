@@ -1,5 +1,5 @@
-#include "../lib/crypto_utils.h"
-#include "../lib/aes.h"
+#include "crypto_utils.h"
+#include "aes.h"
 
 int main() {
 

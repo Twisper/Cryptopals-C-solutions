@@ -1,4 +1,4 @@
-#include "../lib/crypto_utils.h"
+#include "crypto_utils.h"
 
 char xor_breaker(uint8_t *buffer, size_t len);
 

@@ -1,4 +1,4 @@
-#include "../lib/crypto_utils.h"
+#include "crypto_utils.h"
 
 int main() {
 

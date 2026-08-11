@@ -71,6 +71,7 @@ void base64_2hex(const uint8_t *src, uint8_t *dst, const size_t len);
 void xor_array(const uint8_t *src, uint8_t *key, uint8_t *dst, const size_t len, const size_t keylen);
 float bigram_text_oracle(uint8_t *src, size_t len);
 float chi_square_oracle(uint8_t *src, size_t len);
+void pkcs7_padding(uint8_t *src, size_t len, size_t new_len);
 
 /*
     There is one simple trick for fast convertation without using if/else or giant lookup tables
